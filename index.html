@@ -1,0 +1,212 @@
+html
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小羅盤｜教育行政導航</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #D8DCDD;
+            --line-color: #C8C0BE;
+            --accent-color: #F6D494;
+        }
+        body { 
+            background-color: var(--bg-color); 
+            font-family: 'Noto Sans TC', sans-serif; 
+            overflow-x: hidden;
+        }
+        .hard-shadow { 
+            box-shadow: 6px 6px 0px var(--line-color); 
+            border: 2px solid var(--line-color); 
+        }
+        .font-black { font-weight: 900; }
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* 自定義圓體效果 */
+        .rounded-text { font-weight: 400; border-radius: 20px; }
+    </style>
+</head>
+<body class="pb-20">
+
+    <!-- [1] 首頁 (Home) -->
+    <div id="home" class="page active">
+        <header class="p-8 text-center">
+            <h1 class="text-4xl font-black text-gray-700 tracking-tighter">小羅盤</h1>
+            <p class="text-[10px] text-gray-500 tracking-[0.3em] mt-2 uppercase">Cram School Navigator</p>
+        </header>
+
+        <div class="grid grid-cols-2 gap-4 px-6">
+            <!-- 日程表 (最大) -->
+            <div class="col-span-2 bg-[#F6D494] p-6 rounded-3xl hard-shadow" onclick="showPage('daily')">
+                <div class="flex justify-between items-center">
+                    <h2 class="font-black text-xl italic">● 現在日程</h2>
+                    <span class="text-xs font-bold border-b border-black">LIVE</span>
+                </div>
+                <div id="live-task" class="mt-4">
+                    <p class="text-2xl font-black">載入中...</p>
+                </div>
+            </div>
+
+            <!-- 其他四格 -->
+            <div class="bg-white p-5 rounded-3xl hard-shadow aspect-square flex flex-col justify-between" onclick="showPage('yearly')">
+                <h2 class="font-black text-lg">年度<br>行程</h2>
+                <div class="text-[10px] text-gray-400">YEARLY</div>
+            </div>
+            <div class="bg-white p-5 rounded-3xl hard-shadow aspect-square flex flex-col justify-between" onclick="showPage('crisis')">
+                <h2 class="font-black text-lg">危機<br>處理</h2>
+                <div class="text-[10px] text-gray-400">CRISIS HUB</div>
+            </div>
+            <div class="bg-white p-5 rounded-3xl hard-shadow aspect-square flex flex-col justify-between" onclick="showPage('resources')">
+                <h2 class="font-black text-lg">資源<br>外聯</h2>
+                <div class="text-[10px] text-gray-400">RESOURCES</div>
+            </div>
+            <div class="bg-white p-5 rounded-3xl hard-shadow aspect-square flex flex-col justify-between" onclick="showPage('parents')">
+                <h2 class="font-black text-lg">紅綠燈<br>檔案</h2>
+                <div class="flex gap-1">
+                    <div class="w-3 h-3 bg-red-400 rounded-full border border-gray-100"></div>
+                    <div class="w-3 h-3 bg-yellow-400 rounded-full border border-gray-100"></div>
+                    <div class="w-3 h-3 bg-green-400 rounded-full border border-gray-100"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- [2] 危機處理頁面 -->
+    <div id="crisis" class="page px-6 pt-10">
+        <button onclick="showPage('home')" class="mb-6 font-bold">← 返回首頁</button>
+        <h1 class="text-3xl font-black mb-8">危機處理練習</h1>
+        <div class="space-y-6">
+            <div class="bg-white p-6 rounded-2xl hard-shadow" onclick="alert('功能開發中：查詢範例')">
+                <h3 class="font-black text-xl">① 查詢如何回覆家長</h3>
+                <p class="text-sm text-gray-500 mt-2">根據分類，對症下藥</p>
+            </div>
+            <div class="bg-[#F6D494] p-6 rounded-2xl hard-shadow" onclick="startCrisisGame()">
+                <h3 class="font-black text-xl">② 恐龍家長情境練習</h3>
+                <p class="text-sm text-gray-700 mt-2">10秒挑戰：最專業的回應</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl hard-shadow" onclick="showPage('help')">
+                <h3 class="font-black text-xl text-red-500">③ 尋求真人協助</h3>
+                <p class="text-sm text-gray-500 mt-2">聯繫 Jackson 老師</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- [3] 真人協助表單頁面 -->
+    <div id="help" class="page px-6 pt-10">
+        <button onclick="showPage('crisis')" class="mb-6 font-bold">← 返回</button>
+        <h1 class="text-3xl font-black mb-4">尋求協助</h1>
+        <div class="bg-white p-6 rounded-2xl hard-shadow space-y-4">
+            <input type="email" id="help-email" placeholder="您的電子信箱" class="w-full p-3 border rounded-lg bg-gray-50">
+            <textarea id="help-msg" rows="5" placeholder="請描述您遇到的問題..." class="w-full p-3 border rounded-lg bg-gray-50"></textarea>
+            <p class="text-xs text-gray-400">所有資料將發送至：jacksonwang717g7@gmail.com</p>
+            <button onclick="submitHelp()" class="w-full py-4 bg-[#F6D494] font-black rounded-xl">送出申請</button>
+        </div>
+    </div>
+
+    <!-- [4] 紅綠燈檔案頁面 -->
+    <div id="parents" class="page px-6 pt-10">
+        <button onclick="showPage('home')" class="mb-6 font-bold">← 返回首頁</button>
+        <h1 class="text-3xl font-black mb-4">紅綠燈檔案</h1>
+        <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+            <button class="px-4 py-2 bg-red-400 text-white rounded-full text-xs font-bold hard-shadow">🔴 紅燈(5)</button>
+            <button class="px-4 py-2 bg-yellow-400 text-white rounded-full text-xs font-bold hard-shadow">🟡 黃燈(12)</button>
+            <button class="px-4 py-2 bg-green-400 text-white rounded-full text-xs font-bold hard-shadow">🟢 綠燈(30)</button>
+        </div>
+        <div class="space-y-4" id="parent-list">
+            <!-- 預設範例 -->
+            <div class="bg-white p-4 rounded-xl border-l-8 border-red-500 hard-shadow">
+                <h4 class="font-black">王小明家長</h4>
+                <p class="text-xs text-gray-500 mt-1">地雷：對收費日期極度敏感</p>
+                <p class="text-[10px] mt-2 bg-gray-100 p-2 rounded">策略：提早一週給予收費單，口氣溫和但堅持制度。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部全域搜尋 (僅首頁顯示) -->
+    <div id="bottom-bar" class="fixed bottom-0 left-0 w-full bg-[#D8DCDD]/90 backdrop-blur-md pb-6 pt-2">
+        <div class="flex items-center bg-white mx-6 p-3 rounded-full hard-shadow mb-4">
+            <span class="mr-2">🔍</span>
+            <input type="text" placeholder="搜尋家長、學生或 SOP..." class="bg-transparent outline-none w-full text-sm">
+            <span>📷</span>
+        </div>
+    </div>
+
+    <!-- Firebase & Logic Scripts -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Firebase 金鑰
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnVZJgRZc7fid3FZCZeGXchFBrTywTgF8",
+            authDomain: "cram-school-app-86ef7.firebaseapp.com",
+            projectId: "cram-school-app-86ef7",
+            storageBucket: "cram-school-app-86ef7.firebasestorage.app",
+            messagingSenderId: "169123409521",
+            appId: "1:169123409521:web:96b8bbb8ab31c94c64b5d0",
+            measurementId: "G-BE0M81JC1T"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // [頁面切換邏輯]
+        window.showPage = function(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            
+            // 只有首頁顯示底部搜尋列
+            document.getElementById('bottom-bar').style.display = (pageId === 'home') ? 'block' : 'none';
+        };
+
+        // [即時日程邏輯]
+        function updateLiveTask() {
+            const hour = new Date().getHours();
+            let task = "目前無固定行程";
+            let desc = "可整理行政資料";
+
+            if(hour >= 16 && hour < 17) { task = "16:30 接車與點名"; desc = "崑山國小門口"; }
+            else if(hour >= 17 && hour < 19) { task = "英文課輔與批改"; desc = "確認作業進度"; }
+            else if(hour >= 19) { task = "家長接送與櫃檯"; desc = "笑容迎接，專業回報"; }
+
+            document.getElementById('live-task').innerHTML = `
+                <p class="text-2xl font-black italic tracking-tighter">${task}</p>
+                <p class="text-xs mt-1 font-bold opacity-70">${desc}</p>
+            `;
+        }
+        updateLiveTask();
+        setInterval(updateLiveTask, 60000);
+
+        // [真人協助提交]
+        window.submitHelp = async function() {
+            const email = document.getElementById('help-email').value;
+            const msg = document.getElementById('help-msg').value;
+            if(!email || !msg) return alert('請填寫完整資訊');
+
+            try {
+                await addDoc(collection(db, "help_requests"), {
+                    email: email,
+                    message: msg,
+                    timestamp: new Date()
+                });
+                alert('已收到您的請求，Jackson 老師會盡快處理！');
+                showPage('home');
+            } catch (e) {
+                alert('傳送失敗：' + e.message);
+            }
+        };
+
+        // [情境遊戲預留]
+        window.startCrisisGame = function() {
+            alert('遊戲載入中...\n情境：家長要求退費但超過期限。\n計時 10 秒挑戰！');
+            // 此處可擴充情境邏輯
+        }
+    </script>
+</body>
+</html>
