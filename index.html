@@ -1,279 +1,305 @@
-html
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小羅盤｜管理導航系統</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>
-        :root { --bg: #D8DCDD; --line: #C8C0BE; --accent: #F6D494; }
-        body { background-color: var(--bg); font-family: 'Noto Sans TC', sans-serif; }
-        .hard-shadow { box-shadow: 4px 4px 0px var(--line); border: 2px solid var(--line); }
-        .page { display: none; min-height: 100vh; }
-        .page.active { display: block; animation: slideUp 0.3s ease; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* LINE 風格聊天室 */
-        .line-bg { background-color: #7494C4; height: 100vh; display: flex; flex-direction: column; }
-        .chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .bubble-left { background: white; border-radius: 15px 15px 15px 0; padding: 10px 15px; max-width: 80%; align-self: flex-start; position: relative; box-shadow: 0 2px 0 rgba(0,0,0,0.1); }
-        .bubble-right { background: #84EE82; border-radius: 15px 15px 0 15px; padding: 10px 15px; max-width: 80%; align-self: flex-end; position: relative; box-shadow: 0 2px 0 rgba(0,0,0,0.1); }
-        .quiz-footer { background: #f4f4f4; padding: 20px; border-radius: 20px 20px 0 0; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小羅盤｜危機處理訓練系統</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+--bg:#D8DCDD;
+--line:#C8C0BE;
+--accent:#F6D494;
+}
+body{
+background:var(--bg);
+font-family:'Zen Maru Gothic', sans-serif;
+}
+.hard-shadow{
+box-shadow:4px 4px 0 var(--line);
+border:2px solid var(--line);
+}
+.page{display:none;min-height:100vh;}
+.page.active{display:block;}
+.title-font{font-weight:900;letter-spacing:-1px;}
+.pill-search{
+border-radius:9999px;
+padding:12px 20px;
+border:2px solid var(--line);
+}
+.month-scroll{
+display:flex;
+overflow-x:auto;
+gap:12px;
+}
+.month{
+min-width:100px;
+padding:10px;
+background:white;
+border-radius:20px;
+text-align:center;
+cursor:pointer;
+}
+.timer{
+font-weight:900;
+color:red;
+}
+.bottom-btn{
+position:fixed;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+width:90%;
+max-width:500px;
+padding:16px;
+background:var(--accent);
+font-weight:900;
+border-radius:20px;
+}
+</style>
 </head>
-<body class="pb-10">
 
-    <!-- [全局導航欄] -->
-    <nav id="top-nav" class="hidden sticky top-0 bg-[#D8DCDD]/90 backdrop-blur-md p-4 flex items-center z-50 border-b border-[#C8C0BE]">
-        <button onclick="goBack()" class="w-10 h-10 flex items-center justify-center bg-white rounded-full hard-shadow font-bold">←</button>
-        <span id="nav-title" class="ml-4 font-black text-gray-700">頁面標題</span>
-    </nav>
+<body class="pb-24">
 
-    <!-- [1. 首頁] -->
-    <div id="home" class="page active px-6 pt-6">
-        <header class="mb-10 text-center">
-            <h1 class="text-4xl font-black text-gray-700 tracking-tighter">小羅盤</h1>
-            <button onclick="showAdminLogin()" class="text-[10px] text-gray-400 mt-2 tracking-widest uppercase">Admin Login</button>
-        </header>
+<nav id="top-nav" class="hidden sticky top-0 bg-white/80 backdrop-blur p-4 flex items-center border-b">
+<button onclick="goBack()" class="hard-shadow px-3 py-1 bg-white">←</button>
+<span id="nav-title" class="ml-4 font-black"></span>
+</nav>
 
-        <div class="grid grid-cols-2 gap-4">
-            <!-- 日程表 (跨兩欄) -->
-            <div class="col-span-2 bg-[#F6D494] p-6 rounded-3xl hard-shadow" onclick="openPage('daily-detail', '今日日程')">
-                <div class="flex justify-between items-center mb-2">
-                    <h2 class="font-black italic">● LIVE SCHEDULE</h2>
-                    <span class="text-[10px] bg-white/50 px-2 py-1 rounded">NOW</span>
-                </div>
-                <div id="live-task-home" class="font-black text-2xl italic">載入中...</div>
-            </div>
+<!-- 首頁 -->
+<div id="home" class="page active p-6">
+<h1 class="text-4xl title-font mb-6">小羅盤</h1>
 
-            <!-- 年度行程 -->
-            <div class="bg-white p-5 rounded-3xl hard-shadow aspect-square flex flex-col justify-between" onclick="openPage('yearly', '年度行程表')">
-                <h2 class="font-black text-lg text-gray-700">年度<br>行程</h2>
-                <div class="text-[10px] text-gray-400 font-bold tracking-widest">YEARLY</div>
-            </div>
+<div class="grid grid-cols-2 gap-4">
 
-            <!-- 危機處理 -->
-            <div class="bg-white p-5 rounded-3xl hard-shadow aspect-square flex flex-col justify-between" onclick="openPage('crisis-menu', '危機處理練習')">
-                <h2 class="font-black text-lg text-gray-700">危機<br>處理</h2>
-                <div class="text-[10px] text-gray-400 font-bold tracking-widest">CRISIS</div>
-            </div>
+<div class="col-span-2 bg-[#F6D494] p-6 rounded-3xl hard-shadow cursor-pointer"
+onclick="openPage('daily','今日日程')">
+<h2 class="title-font">LIVE SCHEDULE</h2>
+<div id="live-task" class="text-2xl mt-2"></div>
+</div>
 
-            <!-- 資源外聯 -->
-            <div class="bg-white p-5 rounded-3xl hard-shadow aspect-square flex flex-col justify-between" onclick="openPage('resources', '資源與外聯')">
-                <h2 class="font-black text-lg text-gray-700">資源<br>外聯</h2>
-                <div class="text-[10px] text-gray-400 font-bold tracking-widest">RESOURCES</div>
-            </div>
+<div class="bg-white p-5 rounded-3xl hard-shadow cursor-pointer"
+onclick="openPage('yearly','年度行程')">年度行程</div>
 
-            <!-- 紅綠燈檔案 -->
-            <div class="bg-white p-5 rounded-3xl hard-shadow aspect-square flex flex-col justify-between" onclick="openPage('parents', '紅綠燈檔案')">
-                <h2 class="font-black text-lg text-gray-700">紅綠燈<br>檔案</h2>
-                <div class="flex gap-1">
-                    <div class="w-3 h-3 bg-red-400 rounded-full border border-gray-100"></div>
-                    <div class="w-3 h-3 bg-yellow-400 rounded-full border border-gray-100"></div>
-                    <div class="w-3 h-3 bg-green-400 rounded-full border border-gray-100"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="bg-white p-5 rounded-3xl hard-shadow cursor-pointer"
+onclick="openPage('crisis','危機處理')">危機處理</div>
 
-    <!-- [2. 危機處理菜單] -->
-    <div id="crisis-menu" class="page px-6 pt-6">
-        <div class="space-y-4">
-            <div class="bg-white p-6 rounded-2xl hard-shadow" onclick="alert('功能開發中')">
-                <h3 class="font-black text-xl">① 查詢如何回覆家長</h3>
-            </div>
-            <div class="bg-[#F6D494] p-6 rounded-2xl hard-shadow" onclick="startQuiz()">
-                <h3 class="font-black text-xl">② 恐龍家長情境練習</h3>
-                <p class="text-sm mt-2">LINE 風格模擬對話</p>
-            </div>
-        </div>
-    </div>
+<div class="bg-white p-5 rounded-3xl hard-shadow cursor-pointer"
+onclick="openPage('resources','資源外聯')">資源外聯</div>
 
-    <!-- [3. LINE 聊天室練習頁面] -->
-    <div id="quiz-page" class="page line-bg">
-        <div class="p-4 flex justify-between items-center bg-[#7494C4] text-white font-bold border-b border-black/10">
-            <button onclick="goBack()">退出</button>
-            <span id="quiz-progress">1 / 10</span>
-            <span id="quiz-score">Score: 0</span>
-        </div>
-        <div id="chat-box" class="chat-container">
-            <!-- 對話內容 -->
-        </div>
-        <div class="quiz-footer">
-            <div id="quiz-options" class="flex flex-col gap-3">
-                <!-- 選項按鈕 -->
-            </div>
-        </div>
-    </div>
+<div class="bg-white p-5 rounded-3xl hard-shadow cursor-pointer"
+onclick="openPage('parents','紅綠燈檔案')">紅綠燈檔案</div>
 
-    <!-- [4. 紅綠燈檔案列表] -->
-    <div id="parents" class="page px-6 pt-4">
-        <div id="parent-list-display" class="space-y-4">
-            <!-- Firebase 資料 -->
-        </div>
-    </div>
+</div>
 
-    <!-- [5. 管理員編輯頁面] -->
-    <div id="admin-panel" class="page px-6 pt-6 pb-20">
-        <h2 class="text-2xl font-black mb-6 italic underline">EDITOR MODE</h2>
-        <div class="space-y-6">
-            <div class="bg-white p-6 rounded-2xl hard-shadow">
-                <h3 class="font-black mb-4 underline">新增紅綠燈卡片</h3>
-                <input id="adm-p-name" placeholder="學生姓名" class="w-full p-3 border rounded mb-3">
-                <select id="adm-p-color" class="w-full p-3 border rounded mb-3">
-                    <option value="red">🔴 紅燈 (高風險)</option>
-                    <option value="yellow">🟡 黃燈 (觀察中)</option>
-                    <option value="green">🟢 綠燈 (支持型)</option>
-                </select>
-                <textarea id="adm-p-strategy" placeholder="應對策略" class="w-full p-3 border rounded mb-4"></textarea>
-                <button onclick="saveParentToFirebase()" class="w-full py-4 bg-[#F6D494] font-black rounded-xl hard-shadow">儲存至雲端</button>
-            </div>
-        </div>
-    </div>
+<div class="mt-8">
+<input placeholder="搜尋家長/學生..."
+class="pill-search w-full"
+oninput="searchParents(this.value)">
+</div>
 
-    <!-- Firebase 邏輯 -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+</div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCnVZJgRZc7fid3FZCZeGXchFBrTywTgF8",
-            authDomain: "cram-school-app-86ef7.firebaseapp.com",
-            projectId: "cram-school-app-86ef7",
-            storageBucket: "cram-school-app-86ef7.firebasestorage.app",
-            messagingSenderId: "169123409521",
-            appId: "1:169123409521:web:96b8bbb8ab31c94c64b5d0",
-            measurementId: "G-BE0M81JC1T"
-        };
+<!-- 年度行程 -->
+<div id="yearly" class="page p-6">
+<div class="month-scroll mb-6">
+<script>
+for(let i=1;i<=12;i++){
+document.write(`<div class="month hard-shadow"> ${i} 月 </div>`)
+}
+</script>
+</div>
+<div>（此區可自行編輯行程內容）</div>
+</div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+<!-- 日程 -->
+<div id="daily" class="page p-6">
+<h2 class="title-font text-2xl mb-4">現在該做什麼？</h2>
+<div id="daily-content"></div>
+</div>
 
-        // [導航系統]
-        let pageHistory = ['home'];
-        window.openPage = function(pageId, title) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            const target = document.getElementById(pageId);
-            if(target) target.classList.add('active');
-            
-            pageHistory.push(pageId);
-            document.getElementById('top-nav').style.display = (pageId === 'home' || pageId === 'quiz-page') ? 'none' : 'flex';
-            document.getElementById('nav-title').innerText = title;
+<!-- 危機處理 -->
+<div id="crisis" class="page p-6 space-y-4">
 
-            if(pageId === 'parents') renderParents();
-        };
+<div class="bg-white p-6 rounded-2xl hard-shadow cursor-pointer"
+onclick="openPage('query','查詢回覆')">
+查詢如何回覆家長
+</div>
 
-        window.goBack = function() {
-            if(pageHistory.length > 1) {
-                pageHistory.pop();
-                const lastPage = pageHistory[pageHistory.length - 1];
-                openPage(lastPage, "");
-                pageHistory.pop(); 
-            }
-        };
+<div class="bg-[#F6D494] p-6 rounded-2xl hard-shadow cursor-pointer"
+onclick="openPage('quiz-category','情境練習')">
+恐龍家長情境練習
+</div>
 
-        // [管理員登入]
-        window.showAdminLogin = function() {
-            if(prompt("請輸入管理員密碼") === "717") openPage('admin-panel', '編輯模式');
-            else alert("密碼錯誤");
-        };
+<div class="bg-white p-6 rounded-2xl hard-shadow cursor-pointer"
+onclick="openPage('help','真人協助')">
+尋求真人協助
+</div>
 
-        // [Firebase 存取：紅綠燈]
-        window.saveParentToFirebase = async function() {
-            const data = {
-                name: document.getElementById('adm-p-name').value,
-                color: document.getElementById('adm-p-color').value,
-                strategy: document.getElementById('adm-p-strategy').value,
-                createdAt: new Date()
-            };
-            await addDoc(collection(db, "parents"), data);
-            alert("雲端同步成功！");
-            goBack();
-        };
+</div>
 
-        async function renderParents() {
-            const q = query(collection(db, "parents"), orderBy("createdAt", "desc"));
-            const snap = await getDocs(q);
-            const list = document.getElementById('parent-list-display');
-            list.innerHTML = "";
-            snap.forEach(doc => {
-                const p = doc.data();
-                const border = p.color === 'red' ? 'border-red-500' : p.color === 'yellow' ? 'border-yellow-400' : 'border-green-400';
-                list.innerHTML += `
-                    <div class="bg-white p-5 rounded-2xl border-l-8 ${border} hard-shadow">
-                        <h4 class="font-black text-lg">${p.name}</h4>
-                        <p class="text-sm text-gray-600 mt-2">${p.strategy}</p>
-                    </div>
-                `;
-            });
-        }
+<!-- 情境分類 -->
+<div id="quiz-category" class="page p-6 space-y-4">
+<div onclick="startQuiz()" class="hard-shadow p-4 bg-white rounded-xl cursor-pointer">
+學費問題
+</div>
+<div onclick="startQuiz()" class="hard-shadow p-4 bg-white rounded-xl cursor-pointer">
+課程質疑
+</div>
+</div>
 
-        // [LINE 風格題庫邏輯]
-        const quizData = [
-            { q: "老師，我看旁邊那間現在三人同行打八折，你們可以比照嗎？", options: [
-                { t: "不行耶，我們價格很公道了。", s: 3 },
-                { t: "我幫您問問看主管能不能打折。", s: 5 },
-                { t: "了解您的壓力，但我們堅持小班制教學品質...", s: 10 }
-            ]},
-            { q: "為什麼我孩子還在玩遊戲？隔壁小明都在背單字了！", options: [
-                { t: "每個孩子進度不同，不要急。", s: 3 },
-                { t: "如果您擔心，我下週多派一點作業。", s: 5 },
-                { t: "低年級語感建立比死背重要，這是我們的課程目標...", s: 10 }
-            ]}
-        ];
+<!-- Quiz -->
+<div id="quiz" class="page p-6">
+<div class="flex justify-between">
+<span id="progress"></span>
+<span class="timer" id="timer"></span>
+</div>
+<div id="question" class="mt-6 font-bold"></div>
+<div id="options" class="mt-4 space-y-3"></div>
+</div>
 
-        let score = 0;
-        let qIndex = 0;
+<!-- 真人協助 -->
+<div id="help" class="page p-6 space-y-4">
+<input id="email" placeholder="電子信箱" class="w-full p-3 border rounded">
+<textarea id="help-text" placeholder="請輸入問題"
+class="w-full p-3 border rounded"></textarea>
+<input type="file" id="photo">
+<button onclick="submitHelp()" class="bottom-btn hard-shadow">
+送出求助
+</button>
+</div>
 
-        window.startQuiz = function() {
-            score = 0; qIndex = 0;
-            document.getElementById('chat-box').innerHTML = "";
-            openPage('quiz-page', '');
-            nextQuestion();
-        };
+<!-- 紅綠燈 -->
+<div id="parents" class="page p-6">
+<div id="parent-list"></div>
+<button onclick="addParent()" class="bottom-btn hard-shadow">
+＋ 新增檔案
+</button>
+</div>
 
-        function nextQuestion() {
-            if(qIndex >= quizData.length) {
-                alert(`挑戰完成！您的得分：${score} / ${quizData.length * 10}`);
-                return goBack();
-            }
-            const q = quizData[qIndex];
-            document.getElementById('quiz-progress').innerText = `${qIndex + 1} / ${quizData.length}`;
-            
-            // 家長泡泡
-            const chatBox = document.getElementById('chat-box');
-            chatBox.innerHTML += `<div class="bubble-left font-bold text-sm">家長：${q.q}</div>`;
-            chatBox.scrollTop = chatBox.scrollHeight;
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-            // 選項
-            const optBox = document.getElementById('quiz-options');
-            optBox.innerHTML = "";
-            q.options.forEach(o => {
-                const btn = document.createElement('button');
-                btn.className = "bg-white p-4 rounded-xl text-left text-sm font-bold shadow-sm active:bg-gray-200";
-                btn.innerText = o.t;
-                btn.onclick = () => selectOption(o.s, o.t);
-                optBox.appendChild(btn);
-            });
-        }
+const firebaseConfig = {
+apiKey:"YOUR_KEY",
+authDomain:"YOUR_DOMAIN",
+projectId:"YOUR_PROJECT_ID"
+};
 
-        function selectOption(s, t) {
-            score += s;
-            document.getElementById('quiz-score').innerText = `Score: ${score}`;
-            document.getElementById('chat-box').innerHTML += `<div class="bubble-right text-sm">${t}</div>`;
-            qIndex++;
-            setTimeout(nextQuestion, 1000);
-        }
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-        // [即時日程]
-        function tick() {
-            const h = new Date().getHours();
-            const task = h >= 16 && h < 17 ? "接車與點名" : h >= 17 && h < 19 ? "英文課輔中" : "準備結帳與接送";
-            document.getElementById('live-task-home').innerText = task;
-        }
-        setInterval(tick, 1000); tick();
-    </script>
+window.addParent = async function(){
+const name=prompt("學生姓名");
+const color=prompt("red/yellow/green");
+await addDoc(collection(db,"parents"),{name,color});
+loadParents();
+}
+
+async function loadParents(){
+const snap=await getDocs(collection(db,"parents"));
+let html="";
+snap.forEach(d=>{
+const p=d.data();
+html+=`
+<div class="hard-shadow p-4 bg-white mb-3 rounded-xl">
+${p.name} (${p.color})
+<button onclick="deleteParent('${d.id}')">刪除</button>
+</div>`
+});
+document.getElementById("parent-list").innerHTML=html;
+}
+window.deleteParent=async function(id){
+await deleteDoc(doc(db,"parents",id));
+loadParents();
+}
+loadParents();
+</script>
+
+<script>
+let historyStack=["home"];
+function openPage(id,title){
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+document.getElementById("top-nav").classList.remove("hidden");
+document.getElementById("nav-title").innerText=title||"";
+historyStack.push(id);
+}
+function goBack(){
+historyStack.pop();
+const prev=historyStack.pop();
+openPage(prev);
+}
+
+function tick(){
+const h=new Date().getHours();
+const task=h<17?"接車點名":h<19?"英文課輔":"準備結帳";
+document.getElementById("live-task").innerText=task;
+document.getElementById("daily-content").innerText=task;
+}
+tick();
+setInterval(tick,60000);
+
+/* Quiz */
+const quizData=[
+{q:"可以打折嗎？",o:["直接拒絕","詢問主管","強調價值"],a:2},
+{q:"為何孩子在玩？",o:["每人不同","多派作業","說明理念"],a:2}
+];
+let qi=0,score=0,timeLeft=10,interval;
+
+function startQuiz(){
+qi=0;score=0;
+openPage("quiz","情境練習");
+nextQ();
+}
+
+function nextQ(){
+if(qi>=quizData.length){
+alert("完成！得分:"+score);
+return goBack();
+}
+const q=quizData[qi];
+document.getElementById("progress").innerText=(qi+1)+"/"+quizData.length;
+document.getElementById("question").innerText=q.q;
+let optHTML="";
+q.o.forEach((t,i)=>{
+optHTML+=`<div class="hard-shadow p-3 bg-white cursor-pointer"
+onclick="selectOpt(${i})">${t}</div>`;
+});
+document.getElementById("options").innerHTML=optHTML;
+timeLeft=10;
+document.getElementById("timer").innerText=timeLeft;
+interval=setInterval(()=>{
+timeLeft--;
+document.getElementById("timer").innerText=timeLeft;
+if(timeLeft<=0){clearInterval(interval);qi++;nextQ();}
+},1000);
+}
+
+function selectOpt(i){
+clearInterval(interval);
+if(i===quizData[qi].a)score+=10;
+qi++;
+nextQ();
+}
+
+function searchParents(keyword){
+const cards=document.querySelectorAll("#parent-list div");
+cards.forEach(c=>{
+c.style.display=c.innerText.includes(keyword)?"block":"none";
+});
+}
+
+function submitHelp(){
+alert("已送出（示範版）");
+}
+</script>
+
 </body>
 </html>
