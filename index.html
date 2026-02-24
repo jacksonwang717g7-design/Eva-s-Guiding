@@ -1,243 +1,275 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>小羅盤｜管理導航系統</title>
+<title>公司內部任務系統</title>
 
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <style>
-:root{
---bg:#D8DCDD;
---line:#C8C0BE;
---accent:#F6D494;
-}
 body{
-background:var(--bg);
-font-family:'Zen Maru Gothic', sans-serif;
+  font-family: Arial;
+  background:#eef2f7;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
 }
-.hard-shadow{
-box-shadow:4px 4px 0 var(--line);
-border:2px solid var(--line);
+.card{
+  background:white;
+  width:380px;
+  padding:25px;
+  border-radius:12px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.1);
 }
-.page{display:none;min-height:100vh;}
-.page.active{display:block;}
-.title-font{font-weight:900;}
-.pill-search{
-border-radius:9999px;
-padding:12px 20px;
-border:2px solid var(--line);
+h2{text-align:center;}
+input,select,button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border-radius:8px;
+  border:1px solid #ddd;
 }
-.bottom-btn{
-position:fixed;
-bottom:20px;
-left:50%;
-transform:translateX(-50%);
-width:90%;
-max-width:500px;
-padding:16px;
-background:var(--accent);
-font-weight:900;
-border-radius:20px;
+button{
+  background:#4a90e2;
+  color:white;
+  border:none;
+  cursor:pointer;
 }
+.task{
+  background:#f1f1f1;
+  padding:8px;
+  margin-top:8px;
+  border-radius:6px;
+  display:flex;
+  justify-content:space-between;
+}
+.hidden{display:none;}
+.small{font-size:12px;color:gray;}
 </style>
 </head>
 
-<body class="pb-24">
+<body>
 
-<nav id="top-nav" class="hidden sticky top-0 bg-white/80 backdrop-blur p-4 flex items-center border-b">
-<button onclick="goBack()" class="hard-shadow px-3 py-1 bg-white">←</button>
-<span id="nav-title" class="ml-4 font-black"></span>
-</nav>
-
-<!-- 首頁 -->
-<div id="home" class="page active p-6">
-<h1 class="text-4xl title-font mb-6">小羅盤</h1>
-
-<div class="grid grid-cols-2 gap-4">
-
-<div class="col-span-2 bg-[#F6D494] p-6 rounded-3xl hard-shadow cursor-pointer"
-onclick="openPage('daily','今日行程')">
-<h2 class="title-font">今日行程</h2>
-<div id="live-task" class="text-xl mt-2"></div>
+<div class="card" id="loginCard">
+  <h2>手機登入</h2>
+  <input id="phoneNumber" placeholder="+8869xxxxxxxx">
+  <div id="recaptcha-container"></div>
+  <button onclick="sendOTP()">發送驗證碼</button>
+  <input id="otpCode" placeholder="輸入驗證碼">
+  <button onclick="verifyOTP()">驗證登入</button>
 </div>
 
-<div class="bg-white p-5 rounded-3xl hard-shadow cursor-pointer"
-onclick="openPage('yearly','年度行程')">年度行程</div>
+<div class="card hidden" id="mainCard">
+  <h2 id="welcome"></h2>
 
-<div class="bg-white p-5 rounded-3xl hard-shadow cursor-pointer"
-onclick="openPage('crisis','危機處理')">危機處理</div>
+  <div id="bossPanel" class="hidden">
+    <h3>新增員工</h3>
+    <input id="newEmployeePhone" placeholder="+8869xxxxxxxx">
+    <button onclick="createEmployee()">新增員工</button>
 
-<div class="bg-white p-5 rounded-3xl hard-shadow cursor-pointer"
-onclick="openPage('resources','資源外聯')">資源外聯</div>
+    <h3>新增工作</h3>
+    <input id="taskTitle" placeholder="工作名稱">
+    <select id="employeeSelect"></select>
+    <button onclick="addTask()">分配工作</button>
 
-<div class="bg-white p-5 rounded-3xl hard-shadow cursor-pointer"
-onclick="openPage('parents','紅綠燈檔案')">紅綠燈檔案</div>
+    <h3>全部任務總覽</h3>
+    <div id="allTasks"></div>
+  </div>
 
+  <div id="employeePanel" class="hidden">
+    <h3>新增待辦</h3>
+    <input id="todoTitle" placeholder="待辦事項">
+    <button onclick="addTodo()">新增</button>
+  </div>
+
+  <h3>我的任務</h3>
+  <div id="taskList"></div>
+
+  <button onclick="logout()">登出</button>
 </div>
-
-<div class="mt-8">
-<input placeholder="搜尋家長/學生..."
-class="pill-search w-full"
-oninput="searchParents(this.value)">
-</div>
-
-</div>
-
-<!-- 今日行程頁 -->
-<div id="daily" class="page p-6">
-<h2 class="title-font text-2xl mb-4">現在該做什麼？</h2>
-<div id="daily-content" class="text-lg leading-relaxed"></div>
-</div>
-
-<!-- 其他頁面佔位 -->
-<div id="yearly" class="page p-6">年度行程（待擴充）</div>
-<div id="crisis" class="page p-6">危機處理（待擴充）</div>
-<div id="resources" class="page p-6">資源外聯（待擴充）</div>
-
-<!-- 紅綠燈 -->
-<div id="parents" class="page p-6">
-<div id="parent-list"></div>
-<button onclick="addParent()" class="bottom-btn hard-shadow">
-＋ 新增檔案
-</button>
-</div>
-
-<!-- Firebase -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const firebaseConfig = {
-apiKey: "AIzaSyCnVZJgRZc7fid3FZCZeGXchFBrTywTgF8",
-authDomain: "cram-school-app-86ef7.firebaseapp.com",
-projectId: "cram-school-app-86ef7",
-storageBucket: "cram-school-app-86ef7.firebasestorage.app",
-messagingSenderId: "169123409521",
-appId: "1:169123409521:web:96b8bbb8ab31c94c64b5d0",
-measurementId: "G-BE0M81JC1T"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-window.addParent = async function(){
-const name=prompt("學生姓名");
-const color=prompt("red/yellow/green");
-await addDoc(collection(db,"parents"),{name,color});
-loadParents();
-}
-
-async function loadParents(){
-const snap=await getDocs(collection(db,"parents"));
-let html="";
-snap.forEach(d=>{
-const p=d.data();
-html+=`
-<div class="hard-shadow p-4 bg-white mb-3 rounded-xl">
-${p.name} (${p.color})
-<button onclick="deleteParent('${d.id}')">刪除</button>
-</div>`;
-});
-document.getElementById("parent-list").innerHTML=html;
-}
-window.deleteParent=async function(id){
-await deleteDoc(doc(db,"parents",id));
-loadParents();
-}
-loadParents();
-</script>
 
 <script>
-let historyStack=["home"];
+const firebaseConfig = {
+  apiKey: "AIzaSyCnVZJgRZc7fid3FZCZeGXchFBrTywTgF8",
+  authDomain: "cram-school-app-86ef7.firebaseapp.com",
+  projectId: "cram-school-app-86ef7",
+  storageBucket: "cram-school-app-86ef7.firebasestorage.app",
+  messagingSenderId: "169123409521",
+  appId: "1:169123409521:web:96b8bbb8ab31c94c64b5d0"
+};
 
-function openPage(id,title){
-document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-document.getElementById(id).classList.add("active");
-document.getElementById("top-nav").classList.remove("hidden");
-document.getElementById("nav-title").innerText=title||"";
-historyStack.push(id);
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentUserData = null;
+let confirmationResult = null;
+
+/* ================= OTP ================= */
+window.onload = function(){
+  window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container',{
+    size:'normal'
+  });
+};
+
+function sendOTP(){
+  const phoneNumber = document.getElementById("phoneNumber").value;
+  auth.signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
+    .then(result=>{
+      confirmationResult = result;
+      alert("驗證碼已發送");
+    }).catch(error=>{
+      alert(error.message);
+    });
 }
 
-function goBack(){
-historyStack.pop();
-const prev=historyStack.pop();
-document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-document.getElementById(prev).classList.add("active");
+function verifyOTP(){
+  const code = document.getElementById("otpCode").value;
+  confirmationResult.confirm(code)
+    .then(async result=>{
+      const user = result.user;
+      await checkUserRole(user.phoneNumber);
+    }).catch(error=>{
+      alert("驗證失敗");
+    });
 }
 
-/* 今日行程邏輯 */
+/* ================= 檢查角色 ================= */
+async function checkUserRole(phone){
+  const snapshot = await db.collection("users")
+    .where("phone","==",phone).get();
 
-function getTodaySchedule() {
-    const now = new Date();
-    const hour = now.getHours();
-    const minute = now.getMinutes();
-    const totalMinutes = hour * 60 + minute;
-    const day = now.getDay(); // 5=週五
+  if(snapshot.empty){
+    alert("尚未建立帳號，請由老闆新增");
+    auth.signOut();
+    return;
+  }
 
-    function between(sh, sm, eh, em){
-        const start = sh*60+sm;
-        const end = eh*60+em;
-        return totalMinutes >= start && totalMinutes < end;
-    }
-
-    if (between(0,0,12,30)) return "休息時間";
-
-    if (between(12,30,13,0)) {
-        return `① 打掃騎樓<br>
-        ② 確認孩子都有進班，若未通知未出現，記得訊息通知家長`;
-    }
-
-    if (between(13,0,13,30)) return "整理今日待辦事項";
-
-    if (between(14,0,16,0)) {
-        let text="行政工作";
-        if(day===5) text+="<br>＋準備下週晚餐單";
-        return text;
-    }
-
-    if (between(16,0,16,30)) {
-        return `① 準備點心<br>
-        ② 確認孩子都有進班，若未通知未出現，記得訊息通知家長<br>
-        ③ 提醒老師傳當日晚餐單`;
-    }
-
-    if (hour===16 && minute>=30 && minute<40) return "訂晚餐";
-
-    if (hour===16 && minute>=40 && minute<60) return "倒垃圾";
-
-    if (between(17,0,20,0)) {
-        return `① 叫學生回家<br>
-        ② 行政工作<br>
-        ③ 打掃`;
-    }
-
-    if (between(20,0,20,30)) {
-        return `① 晚餐費用、零用金清點<br>
-        ② 隔日待辦事項記錄`;
-    }
-
-    if (between(20,30,23,59)) return "休息時間";
-
-    return "—";
+  currentUserData = snapshot.docs[0].data();
+  showMain();
 }
 
-function tick(){
-const content=getTodaySchedule();
-document.getElementById("live-task").innerHTML=content;
-document.getElementById("daily-content").innerHTML=content;
+/* ================= 老闆功能 ================= */
+async function createEmployee(){
+  const phone = document.getElementById("newEmployeePhone").value;
+  await db.collection("users").add({
+    phone: phone,
+    role:"employee"
+  });
+  alert("員工新增成功");
+  loadEmployees();
 }
 
-tick();
-setInterval(tick,60000);
+async function addTask(){
+  const title=document.getElementById("taskTitle").value;
+  const assigned=document.getElementById("employeeSelect").value;
 
-function searchParents(keyword){
-const cards=document.querySelectorAll("#parent-list div");
-cards.forEach(c=>{
-c.style.display=c.innerText.includes(keyword)?"block":"none";
-});
+  await db.collection("tasks").add({
+    title:title,
+    assignedTo:assigned,
+    completed:false,
+    createdAt:new Date()
+  });
+
+  loadAllTasks();
+  loadTasks();
+}
+
+async function loadEmployees(){
+  const select=document.getElementById("employeeSelect");
+  select.innerHTML="";
+  const snapshot=await db.collection("users")
+    .where("role","==","employee").get();
+  snapshot.forEach(doc=>{
+    const option=document.createElement("option");
+    option.value=doc.data().phone;
+    option.innerText=doc.data().phone;
+    select.appendChild(option);
+  });
+}
+
+/* ================= 任務 ================= */
+async function addTodo(){
+  const title=document.getElementById("todoTitle").value;
+  await db.collection("tasks").add({
+    title:title,
+    assignedTo:currentUserData.phone,
+    completed:false,
+    createdAt:new Date()
+  });
+  loadTasks();
+}
+
+async function toggleComplete(id, current){
+  await db.collection("tasks").doc(id).update({
+    completed:!current
+  });
+  loadTasks();
+  loadAllTasks();
+}
+
+async function loadTasks(){
+  const list=document.getElementById("taskList");
+  list.innerHTML="";
+  const snapshot=await db.collection("tasks")
+    .where("assignedTo","==",currentUserData.phone).get();
+  snapshot.forEach(doc=>{
+    const data=doc.data();
+    const div=document.createElement("div");
+    div.className="task";
+    div.innerHTML=`
+      <span>${data.title}</span>
+      <input type="checkbox"
+      ${data.completed?"checked":""}
+      onclick="toggleComplete('${doc.id}',${data.completed})">
+    `;
+    list.appendChild(div);
+  });
+}
+
+async function loadAllTasks(){
+  if(currentUserData.role!=="boss") return;
+  const list=document.getElementById("allTasks");
+  list.innerHTML="";
+  const snapshot=await db.collection("tasks").get();
+  snapshot.forEach(doc=>{
+    const data=doc.data();
+    const div=document.createElement("div");
+    div.className="task";
+    div.innerHTML=`
+      <span>${data.title} 
+      <div class="small">${data.assignedTo}</div></span>
+      <span>${data.completed?"✅":"⏳"}</span>
+    `;
+    list.appendChild(div);
+  });
+}
+
+/* ================= UI ================= */
+function showMain(){
+  document.getElementById("loginCard").classList.add("hidden");
+  document.getElementById("mainCard").classList.remove("hidden");
+
+  document.getElementById("welcome").innerText=
+    currentUserData.role==="boss"?"老闆模式":"員工模式";
+
+  if(currentUserData.role==="boss"){
+    document.getElementById("bossPanel").classList.remove("hidden");
+    loadEmployees();
+    loadAllTasks();
+  }else{
+    document.getElementById("employeePanel").classList.remove("hidden");
+  }
+
+  loadTasks();
+}
+
+function logout(){
+  auth.signOut();
+  location.reload();
 }
 </script>
 
