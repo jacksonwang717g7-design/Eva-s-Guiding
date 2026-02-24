@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>公司內部任務系統</title>
 
+<!-- ✅ Firebase compat 版本（純 HTML 專用） -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -92,23 +93,26 @@ button{
 </div>
 
 <script>
+/* ✅ Firebase 初始化（純 HTML 專用） */
 const firebaseConfig = {
   apiKey: "AIzaSyCnVZJgRZc7fid3FZCZeGXchFBrTywTgF8",
   authDomain: "cram-school-app-86ef7.firebaseapp.com",
   projectId: "cram-school-app-86ef7",
   storageBucket: "cram-school-app-86ef7.firebasestorage.app",
   messagingSenderId: "169123409521",
-  appId: "1:169123409521:web:96b8bbb8ab31c94c64b5d0"
+  appId: "1:169123409521:web:305ae5468c36b82064b5d0",
+  measurementId: "G-VVZ0HBQ2KJ"
 };
 
 firebase.initializeApp(firebaseConfig);
+
 const auth = firebase.auth();
 const db = firebase.firestore();
 
 let currentUserData = null;
 let confirmationResult = null;
 
-/* ================= OTP ================= */
+/* OTP 初始化 */
 window.onload = function(){
   window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container',{
     size:'normal'
@@ -132,12 +136,11 @@ function verifyOTP(){
     .then(async result=>{
       const user = result.user;
       await checkUserRole(user.phoneNumber);
-    }).catch(error=>{
+    }).catch(()=>{
       alert("驗證失敗");
     });
 }
 
-/* ================= 檢查角色 ================= */
 async function checkUserRole(phone){
   const snapshot = await db.collection("users")
     .where("phone","==",phone).get();
@@ -152,7 +155,7 @@ async function checkUserRole(phone){
   showMain();
 }
 
-/* ================= 老闆功能 ================= */
+/* 老闆功能 */
 async function createEmployee(){
   const phone = document.getElementById("newEmployeePhone").value;
   await db.collection("users").add({
@@ -191,7 +194,7 @@ async function loadEmployees(){
   });
 }
 
-/* ================= 任務 ================= */
+/* 任務 */
 async function addTodo(){
   const title=document.getElementById("todoTitle").value;
   await db.collection("tasks").add({
@@ -240,7 +243,7 @@ async function loadAllTasks(){
     const div=document.createElement("div");
     div.className="task";
     div.innerHTML=`
-      <span>${data.title} 
+      <span>${data.title}
       <div class="small">${data.assignedTo}</div></span>
       <span>${data.completed?"✅":"⏳"}</span>
     `;
@@ -248,7 +251,6 @@ async function loadAllTasks(){
   });
 }
 
-/* ================= UI ================= */
 function showMain(){
   document.getElementById("loginCard").classList.add("hidden");
   document.getElementById("mainCard").classList.remove("hidden");
