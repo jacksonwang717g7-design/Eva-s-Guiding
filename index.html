@@ -3,10 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>小羅盤｜危機處理訓練系統</title>
+<title>小羅盤｜管理導航系統</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
-
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
 
 <style>
@@ -25,28 +24,11 @@ border:2px solid var(--line);
 }
 .page{display:none;min-height:100vh;}
 .page.active{display:block;}
-.title-font{font-weight:900;letter-spacing:-1px;}
+.title-font{font-weight:900;}
 .pill-search{
 border-radius:9999px;
 padding:12px 20px;
 border:2px solid var(--line);
-}
-.month-scroll{
-display:flex;
-overflow-x:auto;
-gap:12px;
-}
-.month{
-min-width:100px;
-padding:10px;
-background:white;
-border-radius:20px;
-text-align:center;
-cursor:pointer;
-}
-.timer{
-font-weight:900;
-color:red;
 }
 .bottom-btn{
 position:fixed;
@@ -77,9 +59,9 @@ border-radius:20px;
 <div class="grid grid-cols-2 gap-4">
 
 <div class="col-span-2 bg-[#F6D494] p-6 rounded-3xl hard-shadow cursor-pointer"
-onclick="openPage('daily','今日日程')">
-<h2 class="title-font">LIVE SCHEDULE</h2>
-<div id="live-task" class="text-2xl mt-2"></div>
+onclick="openPage('daily','今日行程')">
+<h2 class="title-font">今日行程</h2>
+<div id="live-task" class="text-xl mt-2"></div>
 </div>
 
 <div class="bg-white p-5 rounded-3xl hard-shadow cursor-pointer"
@@ -104,74 +86,16 @@ oninput="searchParents(this.value)">
 
 </div>
 
-<!-- 年度行程 -->
-<div id="yearly" class="page p-6">
-<div class="month-scroll mb-6">
-<script>
-for(let i=1;i<=12;i++){
-document.write(`<div class="month hard-shadow"> ${i} 月 </div>`)
-}
-</script>
-</div>
-<div>（此區可自行編輯行程內容）</div>
-</div>
-
-<!-- 日程 -->
+<!-- 今日行程頁 -->
 <div id="daily" class="page p-6">
 <h2 class="title-font text-2xl mb-4">現在該做什麼？</h2>
-<div id="daily-content"></div>
+<div id="daily-content" class="text-lg leading-relaxed"></div>
 </div>
 
-<!-- 危機處理 -->
-<div id="crisis" class="page p-6 space-y-4">
-
-<div class="bg-white p-6 rounded-2xl hard-shadow cursor-pointer"
-onclick="openPage('query','查詢回覆')">
-查詢如何回覆家長
-</div>
-
-<div class="bg-[#F6D494] p-6 rounded-2xl hard-shadow cursor-pointer"
-onclick="openPage('quiz-category','情境練習')">
-恐龍家長情境練習
-</div>
-
-<div class="bg-white p-6 rounded-2xl hard-shadow cursor-pointer"
-onclick="openPage('help','真人協助')">
-尋求真人協助
-</div>
-
-</div>
-
-<!-- 情境分類 -->
-<div id="quiz-category" class="page p-6 space-y-4">
-<div onclick="startQuiz()" class="hard-shadow p-4 bg-white rounded-xl cursor-pointer">
-學費問題
-</div>
-<div onclick="startQuiz()" class="hard-shadow p-4 bg-white rounded-xl cursor-pointer">
-課程質疑
-</div>
-</div>
-
-<!-- Quiz -->
-<div id="quiz" class="page p-6">
-<div class="flex justify-between">
-<span id="progress"></span>
-<span class="timer" id="timer"></span>
-</div>
-<div id="question" class="mt-6 font-bold"></div>
-<div id="options" class="mt-4 space-y-3"></div>
-</div>
-
-<!-- 真人協助 -->
-<div id="help" class="page p-6 space-y-4">
-<input id="email" placeholder="電子信箱" class="w-full p-3 border rounded">
-<textarea id="help-text" placeholder="請輸入問題"
-class="w-full p-3 border rounded"></textarea>
-<input type="file" id="photo">
-<button onclick="submitHelp()" class="bottom-btn hard-shadow">
-送出求助
-</button>
-</div>
+<!-- 其他頁面佔位 -->
+<div id="yearly" class="page p-6">年度行程（待擴充）</div>
+<div id="crisis" class="page p-6">危機處理（待擴充）</div>
+<div id="resources" class="page p-6">資源外聯（待擴充）</div>
 
 <!-- 紅綠燈 -->
 <div id="parents" class="page p-6">
@@ -187,9 +111,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
-apiKey:"YOUR_KEY",
-authDomain:"YOUR_DOMAIN",
-projectId:"YOUR_PROJECT_ID"
+apiKey: "AIzaSyCnVZJgRZc7fid3FZCZeGXchFBrTywTgF8",
+authDomain: "cram-school-app-86ef7.firebaseapp.com",
+projectId: "cram-school-app-86ef7",
+storageBucket: "cram-school-app-86ef7.firebasestorage.app",
+messagingSenderId: "169123409521",
+appId: "1:169123409521:web:96b8bbb8ab31c94c64b5d0",
+measurementId: "G-BE0M81JC1T"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -211,7 +139,7 @@ html+=`
 <div class="hard-shadow p-4 bg-white mb-3 rounded-xl">
 ${p.name} (${p.color})
 <button onclick="deleteParent('${d.id}')">刪除</button>
-</div>`
+</div>`;
 });
 document.getElementById("parent-list").innerHTML=html;
 }
@@ -224,6 +152,7 @@ loadParents();
 
 <script>
 let historyStack=["home"];
+
 function openPage(id,title){
 document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
 document.getElementById(id).classList.add("active");
@@ -231,73 +160,84 @@ document.getElementById("top-nav").classList.remove("hidden");
 document.getElementById("nav-title").innerText=title||"";
 historyStack.push(id);
 }
+
 function goBack(){
 historyStack.pop();
 const prev=historyStack.pop();
-openPage(prev);
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+document.getElementById(prev).classList.add("active");
+}
+
+/* 今日行程邏輯 */
+
+function getTodaySchedule() {
+    const now = new Date();
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+    const totalMinutes = hour * 60 + minute;
+    const day = now.getDay(); // 5=週五
+
+    function between(sh, sm, eh, em){
+        const start = sh*60+sm;
+        const end = eh*60+em;
+        return totalMinutes >= start && totalMinutes < end;
+    }
+
+    if (between(0,0,12,30)) return "休息時間";
+
+    if (between(12,30,13,0)) {
+        return `① 打掃騎樓<br>
+        ② 確認孩子都有進班，若未通知未出現，記得訊息通知家長`;
+    }
+
+    if (between(13,0,13,30)) return "整理今日待辦事項";
+
+    if (between(14,0,16,0)) {
+        let text="行政工作";
+        if(day===5) text+="<br>＋準備下週晚餐單";
+        return text;
+    }
+
+    if (between(16,0,16,30)) {
+        return `① 準備點心<br>
+        ② 確認孩子都有進班，若未通知未出現，記得訊息通知家長<br>
+        ③ 提醒老師傳當日晚餐單`;
+    }
+
+    if (hour===16 && minute>=30 && minute<40) return "訂晚餐";
+
+    if (hour===16 && minute>=40 && minute<60) return "倒垃圾";
+
+    if (between(17,0,20,0)) {
+        return `① 叫學生回家<br>
+        ② 行政工作<br>
+        ③ 打掃`;
+    }
+
+    if (between(20,0,20,30)) {
+        return `① 晚餐費用、零用金清點<br>
+        ② 隔日待辦事項記錄`;
+    }
+
+    if (between(20,30,23,59)) return "休息時間";
+
+    return "—";
 }
 
 function tick(){
-const h=new Date().getHours();
-const task=h<17?"接車點名":h<19?"英文課輔":"準備結帳";
-document.getElementById("live-task").innerText=task;
-document.getElementById("daily-content").innerText=task;
+const content=getTodaySchedule();
+document.getElementById("live-task").innerHTML=content;
+document.getElementById("daily-content").innerHTML=content;
 }
+
 tick();
 setInterval(tick,60000);
-
-/* Quiz */
-const quizData=[
-{q:"可以打折嗎？",o:["直接拒絕","詢問主管","強調價值"],a:2},
-{q:"為何孩子在玩？",o:["每人不同","多派作業","說明理念"],a:2}
-];
-let qi=0,score=0,timeLeft=10,interval;
-
-function startQuiz(){
-qi=0;score=0;
-openPage("quiz","情境練習");
-nextQ();
-}
-
-function nextQ(){
-if(qi>=quizData.length){
-alert("完成！得分:"+score);
-return goBack();
-}
-const q=quizData[qi];
-document.getElementById("progress").innerText=(qi+1)+"/"+quizData.length;
-document.getElementById("question").innerText=q.q;
-let optHTML="";
-q.o.forEach((t,i)=>{
-optHTML+=`<div class="hard-shadow p-3 bg-white cursor-pointer"
-onclick="selectOpt(${i})">${t}</div>`;
-});
-document.getElementById("options").innerHTML=optHTML;
-timeLeft=10;
-document.getElementById("timer").innerText=timeLeft;
-interval=setInterval(()=>{
-timeLeft--;
-document.getElementById("timer").innerText=timeLeft;
-if(timeLeft<=0){clearInterval(interval);qi++;nextQ();}
-},1000);
-}
-
-function selectOpt(i){
-clearInterval(interval);
-if(i===quizData[qi].a)score+=10;
-qi++;
-nextQ();
-}
 
 function searchParents(keyword){
 const cards=document.querySelectorAll("#parent-list div");
 cards.forEach(c=>{
 c.style.display=c.innerText.includes(keyword)?"block":"none";
 });
-}
-
-function submitHelp(){
-alert("已送出（示範版）");
 }
 </script>
 
