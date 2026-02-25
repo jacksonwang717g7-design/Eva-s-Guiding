@@ -6,7 +6,6 @@
 <title>小羅盤｜管理導航系統</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 
 <style>
 body{background:#D8DCDD;font-family:sans-serif;}
@@ -62,21 +61,15 @@ onclick="openPage('crisis','危機處理')">危機處理</div>
 <!-- 危機處理 -->
 <div id="crisis" class="page p-6">
 <h2 class="text-2xl font-bold mb-6">危機處理中心</h2>
-
 <div class="space-y-4">
 <div class="bg-white p-5 rounded-2xl hard-shadow cursor-pointer"
 onclick="openPage('dinoCategory','恐龍闖關')">
 恐龍家長情境練習
 </div>
-
-<div class="bg-white p-5 rounded-2xl hard-shadow cursor-pointer"
-onclick="openPage('humanHelp','真人協助')">
-尋求真人協助
-</div>
 </div>
 </div>
 
-<!-- 分類選單 -->
+<!-- 恐龍分類 -->
 <div id="dinoCategory" class="page p-6">
 <h2 class="text-xl font-bold mb-4">選擇情境類別</h2>
 <div id="category-list" class="space-y-3"></div>
@@ -91,52 +84,75 @@ onclick="openPage('humanHelp','真人協助')">
 <div id="game-area"></div>
 </div>
 
-<!-- 真人協助 -->
-<div id="humanHelp" class="page p-6">
-<h2 class="text-xl font-bold mb-4">真人協助</h2>
-<input type="email" id="userEmail" placeholder="你的電子信箱"
-class="w-full p-3 mb-3 border rounded">
-<textarea id="userMessage" placeholder="請輸入遇到的問題..."
-class="w-full p-3 mb-3 border rounded" rows="5"></textarea>
-<button onclick="sendEmail()"
-class="bg-[#F6D494] p-3 rounded-xl hard-shadow w-full">
-送出請求
-</button>
-<div id="sendStatus" class="mt-3"></div>
-</div>
-
 <script>
 
-/* ===== EmailJS ===== */
-emailjs.init("AlKaSHquzvi9HNXRM");
+/* 今日行程邏輯 */
 
-function sendEmail(){
-emailjs.send("service_y6cebda","template_3gvvjws",{
-from_email:userEmail.value,
-message:userMessage.value
-}).then(()=>{
-sendStatus.innerText="已成功送出";
-}).catch(()=>{
-sendStatus.innerText="寄送失敗";
-});
+function getTodaySchedule() {
+    const now = new Date();
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+    const totalMinutes = hour * 60 + minute;
+    const day = now.getDay(); // 5=週五
+
+    function between(sh, sm, eh, em){
+        const start = sh*60+sm;
+        const end = eh*60+em;
+        return totalMinutes >= start && totalMinutes < end;
+    }
+
+    if (between(0,0,12,30)) return "休息時間";
+
+    if (between(12,30,13,0)) {
+        return `① 打掃騎樓<br>
+        ② 確認孩子都有進班，若未通知未出現，記得訊息通知家長`;
+    }
+
+    if (between(13,0,13,30)) return "整理今日待辦事項";
+
+    if (between(14,0,16,0)) {
+        let text="行政工作";
+        if(day===5) text+="<br>＋準備下週晚餐單";
+        return text;
+    }
+
+    if (between(16,0,16,30)) {
+        return `① 準備點心<br>
+        ② 確認孩子都有進班，若未通知未出現，記得訊息通知家長<br>
+        ③ 提醒老師傳當日晚餐單`;
+    }
+
+    if (hour===16 && minute>=30 && minute<40) return "訂晚餐";
+
+    if (hour===16 && minute>=40 && minute<60) return "倒垃圾";
+
+    if (between(17,0,20,0)) {
+        return `① 叫學生回家<br>
+        ② 行政工作<br>
+        ③ 打掃`;
+    }
+
+    if (between(20,0,20,30)) {
+        return `① 晚餐費用、零用金清點<br>
+        ② 隔日待辦事項記錄`;
+    }
+
+    if (between(20,30,23,59)) return "休息時間";
+
+    return "—";
 }
 
-/* ===== 今日行程完整邏輯 ===== */
-function getTodaySchedule(){
-const now=new Date();
-const h=now.getHours();
-if(h<12)return"上午行政處理";
-if(h<16)return"下午行政工作";
-if(h<20)return"學生接送與輔導";
-return"晚間整理與休息";
-}
 function tick(){
-live-task.innerHTML=getTodaySchedule();
-daily-content.innerHTML=getTodaySchedule();
+const content=getTodaySchedule();
+document.getElementById("live-task").innerHTML=content;
+document.getElementById("daily-content").innerHTML=content;
 }
-tick();setInterval(tick,60000);
 
-/* ===== 年度行程 ===== */
+tick();
+setInterval(tick,60000);
+
+/* ===== 年度行程（完整12月） ===== */
+
 const annualSchedule = {
 1:[
 "確認總部活動",
@@ -238,28 +254,29 @@ const annualSchedule = {
 "元旦放假FB發文"
 ]
 };
+
 let currentMonth=new Date().getMonth()+1;
+
 function renderMonths(){
 let html="";
 for(let i=1;i<=12;i++){
 html+=`<button class="month-btn ${i===currentMonth?'active':''}"
 onclick="selectMonth(${i})">${i}月</button>`;
 }
-month-tabs.innerHTML=html;
+document.getElementById("month-tabs").innerHTML=html;
 renderMonth();
 }
 function selectMonth(m){currentMonth=m;renderMonths();}
 function renderMonth(){
 let html="";
-(annualSchedule[currentMonth]||[]).forEach(e=>{
+annualSchedule[currentMonth].forEach(e=>{
 html+=`<div class="bg-white p-3 mb-2 hard-shadow">${e}</div>`;
 });
-month-content.innerHTML=html;
+document.getElementById("month-content").innerHTML=html;
 }
 renderMonths();
 
-/* ===== 恐龍題庫 30題 ===== */
-
+/* ===== 恐龍題庫（5類共30題） ===== */
 const questionBank={
 "問班":[
 {q:"數學一週幾天？費用？",o:["直接報價","先安排試聽","叫家長看公告"],c:1},
@@ -303,8 +320,7 @@ const questionBank={
 ]
 };
 
-let currentCategory="";
-let qIndex=0,score=0,timer,timeLeft=10;
+let currentCategory="",qIndex=0,score=0,timer,timeLeft=10;
 
 function renderCategories(){
 let html="";
@@ -312,13 +328,12 @@ Object.keys(questionBank).forEach(cat=>{
 html+=`<div class="bg-white p-4 hard-shadow cursor-pointer"
 onclick="startGame('${cat}')">${cat}</div>`;
 });
-category-list.innerHTML=html;
+document.getElementById("category-list").innerHTML=html;
 }
 renderCategories();
 
 function startGame(cat){
-currentCategory=cat;
-qIndex=0;score=0;
+currentCategory=cat;qIndex=0;score=0;
 openPage("dinoGame",cat+" 闖關");
 nextQ();
 }
@@ -327,7 +342,8 @@ function nextQ(){
 let qs=questionBank[currentCategory];
 if(qIndex>=qs.length){
 saveHistory();
-game-area.innerHTML=`完成！得分 ${score}/6
+document.getElementById("game-area").innerHTML=
+`完成！得分 ${score}/${qs.length}
 <br><button onclick="openPage('dinoCategory','恐龍闖關')"
 class="mt-3 bg-white p-2 hard-shadow">回分類</button>`;
 return;
@@ -340,11 +356,11 @@ q.o.forEach((opt,i)=>{
 html+=`<button onclick="checkA(${i})"
 class="block w-full bg-white p-2 mb-2 hard-shadow">${opt}</button>`;
 });
-game-area.innerHTML=html;
+document.getElementById("game-area").innerHTML=html;
 
 timer=setInterval(()=>{
 timeLeft--;
-timer.innerText=timeLeft;
+document.getElementById("timer").innerText=timeLeft;
 if(timeLeft<=0){clearInterval(timer);qIndex++;nextQ();}
 },1000);
 }
@@ -357,11 +373,7 @@ qIndex++;nextQ();
 
 function saveHistory(){
 let h=JSON.parse(localStorage.getItem("history")||"[]");
-h.push({
-date:new Date().toLocaleString(),
-category:currentCategory,
-score:score
-});
+h.push({date:new Date().toLocaleString(),category:currentCategory,score:score});
 localStorage.setItem("history",JSON.stringify(h));
 }
 
@@ -371,7 +383,7 @@ let html="<h3 class='font-bold mb-2'>歷史紀錄</h3>";
 h.forEach(r=>{
 html+=`<div>${r.date}｜${r.category}｜${r.score}分</div>`;
 });
-category-list.innerHTML=html;
+document.getElementById("category-list").innerHTML=html;
 }
 
 /* 導航 */
@@ -379,15 +391,16 @@ let stack=["home"];
 function openPage(id,title){
 document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
 document.getElementById(id).classList.add("active");
-top-nav.classList.remove("hidden");
-nav-title.innerText=title;
+document.getElementById("top-nav").classList.remove("hidden");
+document.getElementById("nav-title").innerText=title;
 stack.push(id);
 }
 function goBack(){
 stack.pop();
-let prev=stack.pop();
+let prev=stack.pop()||"home";
 document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
 document.getElementById(prev).classList.add("active");
+if(prev==="home")document.getElementById("top-nav").classList.add("hidden");
 }
 
 </script>
