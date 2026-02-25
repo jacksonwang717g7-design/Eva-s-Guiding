@@ -31,8 +31,8 @@ body{background:#D8DCDD;font-family:sans-serif;}
 <div class="grid grid-cols-2 gap-4">
 
 <div class="col-span-2 bg-[#F6D494] p-6 rounded-3xl hard-shadow cursor-pointer"
-onclick="openPage('daily','今日行程')">
-<h2 class="font-black">今日行程</h2>
+onclick="openPage('daily','現在行程')">
+<h2 class="font-black">現在行程</h2>
 <div id="live-task"></div>
 </div>
 
@@ -45,7 +45,7 @@ onclick="openPage('crisis','危機處理')">危機處理</div>
 </div>
 </div>
 
-<!-- 今日行程 -->
+<!-- 現在行程 -->
 <div id="daily" class="page p-6">
 <h2 class="text-2xl font-bold mb-4">現在該做什麼？</h2>
 <div id="daily-content"></div>
@@ -86,7 +86,7 @@ onclick="openPage('dinoCategory','恐龍闖關')">
 
 <script>
 
-/* 今日行程邏輯 */
+/* 現在行程邏輯 */
 
 function getTodaySchedule() {
     const now = new Date();
