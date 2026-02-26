@@ -91,6 +91,18 @@ onclick="openPage('parentCategory','家長問題分類')">
 <div id="game-area"></div>
 </div>
 
+<!-- 家長分類頁 -->
+<div id="parentCategory" class="page p-6">
+<h2 class="text-2xl font-bold mb-6">家長問題分類</h2>
+<div id="parent-type-list" class="space-y-4"></div>
+</div>
+
+<!-- 家長訊息頁 -->
+<div id="parentMessages" class="page p-6">
+<h2 class="text-2xl font-bold mb-6" id="parent-title"></h2>
+<div id="parent-message-list" class="space-y-3"></div>
+</div>
+
 <script>
 
 /* 現在行程邏輯 */
@@ -410,6 +422,89 @@ document.getElementById(prev).classList.add("active");
 if(prev==="home")document.getElementById("top-nav").classList.add("hidden");
 }
 
-</script>
+/* ===== 家長問題分類系統 ===== */
+
+const parentData = {
+
+"精打細算型":[
+"請問現在報名有早鳥優惠嗎？",
+"如果只上英文，不上安親，費用可以再調整嗎？",
+"隔壁補習班一個月便宜800，你們差在哪裡？",
+"兄弟一起報名有沒有折扣？",
+"他們平常寫完作業會做什麼？"
+],
+
+"觀望比較型":[
+"我們還在看幾家，想再了解一下你們的課程安排。",
+"可以給我看看上課實際照片或成果嗎？",
+"我可以跟孩子一起試聽嗎？",
+"孩子適合什麼班型？會不會跟不上？",
+"能不能先試上看看？",
+"你們和OO補習班最大的差別是什麼？"
+],
+
+"情緒焦慮型":[
+"我孩子回家說今天有人跟他吵架，可以幫我了解一下嗎？",
+"他最近功課寫很慢，是不是跟不上？",
+"我很怕他英文越來越落後。",
+"他說不想去上課，是發生什麼事嗎？",
+"老師有沒有特別注意到他最近的狀況？"
+],
+
+"高期待型":[
+"這次段考班上第一名幾分？",
+"他為什麼只考90？錯在哪裡？",
+"可以幫他安排進階教材嗎？",
+"多久可以看到明顯進步？",
+"我希望他小六前英檢初級可以過。"
+],
+
+"支持但需要說服型":[
+"老師這樣安排一定有原因，可以跟我說明一下嗎？",
+"我其實是支持的，只是想更了解你們的規劃。",
+"價格調整我理解，只是想知道調整的依據。",
+"如果這樣對孩子比較好，我們可以配合。",
+"我相信老師，只是想知道長期規劃是什麼。"
+]
+
+};
+
+/* 顯示分類卡片 */
+function renderParentCategories(){
+let html="";
+Object.keys(parentData).forEach(type=>{
+html+=`
+<div class="bg-white p-4 rounded-2xl hard-shadow cursor-pointer"
+onclick="showParentMessages('${type}')">
+${type}
+</div>
+`;
+});
+document.getElementById("parent-type-list").innerHTML=html;
+}
+
+renderParentCategories();
+
+/* 顯示該分類訊息 */
+function showParentMessages(type){
+
+openPage("parentMessages", type);
+
+document.getElementById("parent-title").innerText=type+" 範例訊息";
+
+let html="";
+
+parentData[type].forEach(msg=>{
+html+=`
+<div class="bg-white p-3 rounded-xl border hard-shadow">
+${msg}
+</div>
+`;
+});
+
+document.getElementById("parent-message-list").innerHTML=html;
+}
+    
+</script
 </body>
 </html>
